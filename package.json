@@ -1,0 +1,20 @@
+{
+  "name": "susu-savings-group",
+  "version": "1.0.0",
+  "description": "A JavaScript and Node.js project for managing a rotating susu savings group, with weekly contributions, member tracking, and payouts.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aishalewa/susu-savings-group.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aishalewa/susu-savings-group/issues"
+  },
+  "homepage": "https://github.com/aishalewa/susu-savings-group#readme"
+}
