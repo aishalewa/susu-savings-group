@@ -4,7 +4,9 @@
   "description": "A JavaScript and Node.js project for managing a rotating susu savings group, with weekly contributions, member tracking, and payouts.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test script.test.js"
+}
+
   },
   "repository": {
     "type": "git",

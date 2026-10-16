@@ -232,25 +232,17 @@ function closeWeek() {
 
 
 
+module.exports = {
+    group,
+    addMember,
+    toMinorUnits,
+    formatGHS,
+    getWeeklyContributionUnits,
+    recordContribution,
+    getMemberPaymentStatus,
+    showReport,
+    closeWeek
+};
 
-
-
-addMember("Aisha");
-addMember("Kofi");
-addMember("Esi");
-
-recordContribution(1, "50.00");
-recordContribution(2, "50.00");
-recordContribution(3, "30.00");
-
-showReport();
-
-closeWeek();
-recordContribution(3, "20.00");
-closeWeek();
-showReport();
-
-console.log(toMinorUnits(50.00))
-console.log(formatGHS(50.00))
 
 
