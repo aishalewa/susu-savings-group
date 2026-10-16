@@ -26,7 +26,7 @@ function addMember(name) {
 
     const member = {
     id: group.members.length + 1,
-    mame: clearName
+    name: clearName
 };
 //add new member to the members array
 group.members.push(member);
