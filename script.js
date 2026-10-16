@@ -8,7 +8,15 @@ const group = {
 
 console.log(group);
 
+function getWeeklyContributionUnits() {
+    return toMinorUnits(group.weeklyContribution);
+}
+
 function addMember(name) {
+    if (typeof name !== "string") {
+        console.log("Please enter a valid member name.");
+        return;
+    }
     const clearName = name.trim();
 
     if (clearName === "") {
@@ -36,6 +44,46 @@ console.log(`${clearName} has been added successfully.`);
 
 
 };
+
+function recordContribution(memberId, amount) {
+    // Find the member making the payment.
+    const member = group.members.find(
+        member => member.id === memberId
+    );
+
+    if (!member) {
+        console.log("Error: Member not found.");
+        return;
+    }
+
+    const paymentAmount = toMinorUnits(amount);
+
+    // Reject invalid, zero or negative amounts.
+    if (paymentAmount === null || paymentAmount <= 0) {
+        console.log("Error: Enter a valid amount greater than zero.");
+        return;
+    }
+
+    // Find all this member's payments for the current week.
+    const amountAlreadyPaid = group.payments
+        .filter(payment =>
+            payment.memberId === memberId &&
+            payment.week === group.currentWeek
+        )
+        .reduce((total, payment) => total + payment.amount, 0);
+
+    const amountOwed =
+        getWeeklyContributionUnits() - amountAlreadyPaid;
+
+    // Reject payments greater than the outstanding balance.
+    if (paymentAmount > amountOwed) {
+        console.log(
+            `Error: ${member.name} only owes ${formatGHS(amountOwed)}.`
+        );
+        return;
+    }
+
+
 
 //convert amount to integer to avoid floating-point errors
 function toMinorUnits(amount) {
