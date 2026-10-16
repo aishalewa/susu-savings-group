@@ -6,7 +6,27 @@ const group = {
     payoutHistory: []
 }
 
-console.log(group);
+// console.log(group);
+
+function toMinorUnits(amount) {
+    const amountText = String(amount).trim();
+
+    // Accept only non-negative amounts with up to 2 decimal places.
+    if (!/^\d+(\.\d{1,2})?$/.test(amountText)) {
+        return null;
+    }
+
+    const [whole, decimal = ""] = amountText.split(".");
+
+    return Number(whole) * 100 + Number(decimal.padEnd(2, "0"));
+}
+
+function formatGHS(amountUnits) {
+    const whole = Math.floor(amountUnits / 100);
+    const decimal = amountUnits % 100;
+
+    return `GHS ${whole}.${String(decimal).padStart(2, "0")}`;
+}
 
 function getWeeklyContributionUnits() {
     return toMinorUnits(group.weeklyContribution);
@@ -94,34 +114,131 @@ function recordContribution(memberId, amount) {
     );
 }
 
+function getMemberPaymentStatus(memberId, week) {
+    const amountPaid = group.payments
+        .filter(payment =>
+            payment.memberId === memberId &&
+            payment.week === week
+        )
+        .reduce((total, payment) => total + payment.amount, 0);
 
+    const amountOwed = getWeeklyContributionUnits() - amountPaid;
 
-//convert amount to integer to avoid floating-point errors
-function toMinorUnits(amount) {
-    const amountText = String(amount).trim();
+    return {
+        amountPaid: amountPaid,
+        amountOwed: amountOwed,
+        paidInFull: amountOwed === 0
+    };
+}
 
-    // Accept only non-negative amounts with up to 2 decimal places.
-    if (!/^\d+(\.\d{1,2})?$/.test(amountText)) {
-        return null;
+function showReport() {
+    console.log("\n===== SUSU GROUP REPORT =====");
+    console.log(
+        `Weekly contribution: ${formatGHS(getWeeklyContributionUnits())}`
+    );
+    console.log(`Current week: ${group.currentWeek}`);
+
+    console.log("\n--- Current Week Payments ---");
+
+    if (group.members.length === 0) {
+        console.log("No members have joined yet.");
     }
 
-    const [whole, decimal = ""] = amountText.split(".");
+    group.members.forEach(member => {
+        const status = getMemberPaymentStatus(
+            member.id,
+            group.currentWeek
+        );
 
-    return Number(whole) * 100 + Number(decimal.padEnd(2, "0"));
+        if (status.paidInFull) {
+            console.log(`${member.name}: Paid in full`);
+        } else {
+            console.log(
+                `${member.name}: Paid ${formatGHS(status.amountPaid)}, owes ${formatGHS(status.amountOwed)}`
+            );
+        }
+    });
+    console.log("\n--- Payout History ---");
+
+    if (group.payoutHistory.length === 0) {
+        console.log("No payouts have been made yet.");
+    } else {
+        group.payoutHistory.forEach(payout => {
+            console.log(
+                `Week ${payout.week}: ${payout.recipientName} received ${formatGHS(payout.amount)}`
+            );
+        });
+    }
+
+    console.log("============================\n");
 }
 
-function formatGHS(amountUnits) {
-    const whole = Math.floor(amountUnits / 100);
-    const decimal = amountUnits % 100;
+function closeWeek() {
+    // A group without members cannot receive contributions or pay out.
+    if (group.members.length === 0) {
+        console.log("Cannot close the week because there are no members.");
+        return;
+    }
 
-    return `GHS ${whole}.${String(decimal).padStart(2, "0")}`;
+    // Find every member who has not paid the full contribution.
+    const membersWhoOwe = group.members
+        .map(member => ({
+            member: member,
+            status: getMemberPaymentStatus(
+                member.id,
+                group.currentWeek
+            )
+        }))
+        .filter(item => !item.status.paidInFull);
+
+    // Do not pay out or advance the week if anyone still owes money.
+    if (membersWhoOwe.length > 0) {
+        console.log(`Week ${group.currentWeek} cannot close yet.`);
+
+        membersWhoOwe.forEach(item => {
+            console.log(
+                `${item.member.name} owes ${formatGHS(item.status.amountOwed)}.`
+            );
+        });
+
+        return;
+    }
+
+    const recipientIndex =
+        group.payoutHistory.length % group.members.length;
+
+    const recipient = group.members[recipientIndex];
+
+    // Calculate the pot using exact internal units.
+    const pot =
+        getWeeklyContributionUnits() * group.members.length;
+
+    // Save the successful payout in the history.
+    group.payoutHistory.push({
+        week: group.currentWeek,
+        recipientId: recipient.id,
+        recipientName: recipient.name,
+        amount: pot
+    });
+
+    console.log(`Week ${group.currentWeek} closed successfully.`);
+    console.log(
+        `${recipient.name} receives the pot of ${formatGHS(pot)}.`
+    );
+
+    // Advance to the next week only after a successful payout.
+    group.currentWeek++;
 }
+
+
 
 
 
 
 addMember("Aisha");
-addMember("Aisha");
+addMember("Kofi");
+addMember("Esi");
+
 
 console.log(toMinorUnits(50.00))
 console.log(formatGHS(50.00))
