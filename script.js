@@ -83,6 +83,17 @@ function recordContribution(memberId, amount) {
         return;
     }
 
+    group.payments.push({
+        memberId: memberId,
+        week: group.currentWeek,
+        amount: paymentAmount
+    });
+
+    console.log(
+        `${member.name} paid ${formatGHS(paymentAmount)} for week ${group.currentWeek}.`
+    );
+}
+
 
 
 //convert amount to integer to avoid floating-point errors
